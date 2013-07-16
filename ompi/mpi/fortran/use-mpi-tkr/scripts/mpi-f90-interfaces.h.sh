@@ -9515,6 +9515,7 @@ output_241_x() {
     cat <<EOF
 
 subroutine ${procedure}(type, size, ierror)
+  include 'mpif-config.h'
   integer, intent(in) :: type
   integer(kind=MPI_COUNT_KIND), intent(out) :: size
   integer, intent(out) :: ierror
