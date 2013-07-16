@@ -9,6 +9,8 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
+ * Copyright (c) 2013      Los Alamos National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  * 
  * Additional copyrights may follow
@@ -28,16 +30,14 @@
 
 #if OPAL_HAVE_WEAK_SYMBOLS && OMPI_PROFILING_DEFINES
 #pragma weak MPI_Get_elements = PMPI_Get_elements
+#pragma weak MPI_Get_elements_x = PMPI_Get_elements_x
 #endif
 
 #if OMPI_PROFILING_DEFINES
 #include "ompi/mpi/c/profile/defines.h"
 #endif
 
-static const char FUNC_NAME[] = "MPI_Get_elements";
-
-
-int MPI_Get_elements(MPI_Status *status, MPI_Datatype datatype, int *count) 
+static int _MPI_Get_elements(const char *func_name, MPI_Status *status, MPI_Datatype datatype, MPI_Count *count)
 {
     size_t size, internal_count;
     int i;
@@ -58,7 +58,7 @@ int MPI_Get_elements(MPI_Status *status, MPI_Datatype datatype, int *count)
 
     if (MPI_PARAM_CHECK) {
         int err = MPI_SUCCESS;
-        OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
+        OMPI_ERR_INIT_FINALIZE(func_name);
         if (NULL == status || MPI_STATUSES_IGNORE == status || 
             MPI_STATUS_IGNORE == status || NULL == count) {
             err = MPI_ERR_ARG;
@@ -67,7 +67,7 @@ int MPI_Get_elements(MPI_Status *status, MPI_Datatype datatype, int *count)
         } else {
             OMPI_CHECK_DATATYPE_FOR_RECV(err, datatype, 1);
         }
-        OMPI_ERRHANDLER_CHECK(err, MPI_COMM_WORLD, err, FUNC_NAME);
+        OMPI_ERRHANDLER_CHECK(err, MPI_COMM_WORLD, err, func_name);
     }
 
     *count = 0;
@@ -105,16 +105,41 @@ int MPI_Get_elements(MPI_Status *status, MPI_Datatype datatype, int *count)
         }
         goto more_than_int_elements;
     }
-    return OMPI_ERRHANDLER_INVOKE(MPI_COMM_WORLD, MPI_ERR_ARG, FUNC_NAME);
+    return OMPI_ERRHANDLER_INVOKE(MPI_COMM_WORLD, MPI_ERR_ARG, func_name);
  more_than_int_elements:
-    if( internal_count > ((size_t)INT_MAX) ) {
-        /* We have more elements that we can represent with a signed int, and therefore
-         * we're outside the standard here. I don't see what should we report back
-         * here to make it useful. So, let's return an untouched *count and trigger
-         * an MPI_ERR_TRUNCATE.
+    if( internal_count > (size_t) MPI_COUNT_MAX ) {
+        /* We have more elements that we can represent with a ssize_t. We must
+         * set count to MPI_UNDEFINED (MPI 3.0). We should still be able to return
+         * MPI_ERR_TRUNCATE here.
          */
-        return MPI_ERR_TRUNCATE;
+        *count = MPI_UNDEFINED;
+    } else {
+        *count = (ssize_t) internal_count;
     }
-    *count = (int)internal_count;
+
     return MPI_SUCCESS;
+}
+
+int MPI_Get_elements(MPI_Status *status, MPI_Datatype datatype, int *count) 
+{
+    MPI_Count lcount;
+    int rc;
+
+    rc = _MPI_Get_elements ("MPI_Get_elements", status, datatype, &lcount);
+    if (lcount > (MPI_Count) INT_MAX ) {
+        /* We have more elements that we can represent with a signed int. We must
+         * set count to MPI_UNDEFINED (MPI 3.0). We should still be able to return
+         * MPI_ERR_TRUNCATE here.
+         */
+        *count = MPI_UNDEFINED;
+    } else {
+        *count = (int) lcount;
+    }
+
+    return rc;
+}
+
+int MPI_Get_elements_x(MPI_Status *status, MPI_Datatype datatype, MPI_Count *count)
+{
+    return _MPI_Get_elements ("MPI_Get_elements_x", status, datatype, count);
 }

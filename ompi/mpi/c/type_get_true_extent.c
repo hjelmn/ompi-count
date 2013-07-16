@@ -9,6 +9,8 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
+ * Copyright (c) 2013      Los Alamos National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  * 
  * Additional copyrights may follow
@@ -27,18 +29,18 @@
 
 #if OPAL_HAVE_WEAK_SYMBOLS && OMPI_PROFILING_DEFINES
 #pragma weak MPI_Type_get_true_extent = PMPI_Type_get_true_extent
+#pragma weak MPI_Type_get_true_extent_x = PMPI_Type_get_true_extent_x
 #endif
 
 #if OMPI_PROFILING_DEFINES
 #include "ompi/mpi/c/profile/defines.h"
 #endif
 
-static const char FUNC_NAME[] = "MPI_Type_get_true_extent";
 
-
-int MPI_Type_get_true_extent(MPI_Datatype datatype,
-                             MPI_Aint *true_lb, 
-                             MPI_Aint *true_extent)
+static int _MPI_Type_get_true_extent(const char *func_name,
+                                     MPI_Datatype datatype,
+                                     MPI_Aint *true_lb,
+                                     MPI_Aint *true_extent)
 {
    int rc;
 
@@ -47,18 +49,43 @@ int MPI_Type_get_true_extent(MPI_Datatype datatype,
    );
    
    if( MPI_PARAM_CHECK ) {
-      OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
+      OMPI_ERR_INIT_FINALIZE(func_name);
       if (NULL == datatype || MPI_DATATYPE_NULL == datatype) {
         return OMPI_ERRHANDLER_INVOKE(MPI_COMM_WORLD, MPI_ERR_TYPE,
-                                      FUNC_NAME );
+                                      func_name );
       } else if (NULL == true_lb || NULL == true_extent) {
         return OMPI_ERRHANDLER_INVOKE(MPI_COMM_WORLD, MPI_ERR_ARG,
-                                      FUNC_NAME );
+                                      func_name );
       }
    }
 
    OPAL_CR_ENTER_LIBRARY();
 
    rc = ompi_datatype_get_true_extent( datatype, true_lb, true_extent );
-   OMPI_ERRHANDLER_RETURN(rc, MPI_COMM_WORLD, rc, FUNC_NAME );
+   OMPI_ERRHANDLER_RETURN(rc, MPI_COMM_WORLD, rc, func_name );
+}
+
+int MPI_Type_get_true_extent(MPI_Datatype datatype,
+                              MPI_Aint *true_lb,
+                              MPI_Aint *true_extent)
+{
+   return _MPI_Type_get_true_extent("MPI_Type_get_true_extent", datatype,
+                                    true_lb, true_extent);
+}
+
+int MPI_Type_get_true_extent_x(MPI_Datatype datatype,
+                               MPI_Count *true_lb,
+                               MPI_Count *true_extent)
+{
+   MPI_Aint atrue_lb, atrue_extent;
+   int rc;
+
+   rc = _MPI_Type_get_true_extent("MPI_Type_get_true_extent", datatype,
+                                  &atrue_lb, &atrue_extent);
+   if (MPI_SUCCESS == rc) {
+      *true_lb = ((size_t) atrue_lb > MPI_COUNT_MAX) ? MPI_UNDEFINED : atrue_lb;
+      *true_extent = ((size_t) atrue_extent > MPI_COUNT_MAX) ? MPI_UNDEFINED : atrue_extent;
+   }
+
+   return rc;
 }

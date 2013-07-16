@@ -10,6 +10,8 @@
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
  * Copyright (c) 2007      Cisco Systems, Inc.  All rights reserved.
+ * Copyright (c) 2013      Los Alamos National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  * 
  * Additional copyrights may follow
@@ -28,17 +30,16 @@
 
 #if OPAL_HAVE_WEAK_SYMBOLS && OMPI_PROFILING_DEFINES
 #pragma weak MPI_Status_set_elements = PMPI_Status_set_elements
+#pragma weak MPI_Status_set_elements_x = PMPI_Status_set_elements_x
 #endif
 
 #if OMPI_PROFILING_DEFINES
 #include "ompi/mpi/c/profile/defines.h"
 #endif
 
-static const char FUNC_NAME[] = "MPI_Status_set_elements";
 
-
-int MPI_Status_set_elements(MPI_Status *status, MPI_Datatype datatype,
-                            int count) 
+static int _MPI_Status_set_elements(const char *func_name, MPI_Status *status, MPI_Datatype datatype,
+                                    MPI_Count count)
 {
     int rc = MPI_SUCCESS;
     size_t size;
@@ -58,13 +59,13 @@ int MPI_Status_set_elements(MPI_Status *status, MPI_Datatype datatype,
     OPAL_CR_NOOP_PROGRESS();
 
     if (MPI_PARAM_CHECK) {
-        OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
+        OMPI_ERR_INIT_FINALIZE(func_name);
         if (NULL == datatype || MPI_DATATYPE_NULL == datatype) {
             rc = MPI_ERR_TYPE;
         } else if (count < 0) {
             rc = MPI_ERR_COUNT;
         }
-        OMPI_ERRHANDLER_CHECK(rc, MPI_COMM_WORLD, rc, FUNC_NAME);
+        OMPI_ERRHANDLER_CHECK(rc, MPI_COMM_WORLD, rc, func_name);
     }
 
     /* ROMIO calls MPI_STATUS_SET_ELEMENTS with IGNORE values, so we
@@ -81,4 +82,16 @@ int MPI_Status_set_elements(MPI_Status *status, MPI_Datatype datatype,
         status->_ucount = size;
     }
     return MPI_SUCCESS;
+}
+
+int MPI_Status_set_elements(MPI_Status *status, MPI_Datatype datatype, int count)
+{
+    return _MPI_Status_set_elements ("MPI_Status_set_elements", status, datatype,
+                                     (MPI_Count) count);
+}
+
+int MPI_Status_set_elements_x(MPI_Status *status, MPI_Datatype datatype, MPI_Count count)
+{
+    return _MPI_Status_set_elements ("MPI_Status_set_elements_x", status, datatype,
+                                     count);
 }

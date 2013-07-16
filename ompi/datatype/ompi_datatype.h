@@ -272,14 +272,14 @@ ompi_datatype_get_true_extent( const ompi_datatype_t* type, OPAL_PTRDIFF_TYPE* t
     return opal_datatype_get_true_extent( &type->super, true_lb, true_extent);
 }
 
-static inline int32_t
+static inline ssize_t
 ompi_datatype_get_element_count( const ompi_datatype_t* type, size_t iSize )
 {
     return opal_datatype_get_element_count( &type->super, iSize );
 }
 
 static inline int32_t
-ompi_datatype_set_element_count( const ompi_datatype_t* type, uint32_t count, size_t* length )
+ompi_datatype_set_element_count( const ompi_datatype_t* type, size_t count, size_t* length )
 {
     return opal_datatype_set_element_count( &type->super, count, length );
 }
