@@ -102,6 +102,13 @@
 #define OMPI_DATATYPE_MPI_MAX_PREDEFINED          (OMPI_DATATYPE_MPI_UNAVAILABLE+1)
 
 /*
+ * Ensure we can support the predefined datatypes.
+ */
+#if OMPI_DATATYPE_MAX_PREDEFINED < OMPI_DATATYPE_MPI_UNAVAILABLE
+#error OMPI_DATATYPE_MAX_PREDEFINED should be updated to the value of OMPI_DATATYPE_MPI_UNAVAILABLE
+#endif
+
+/*
  * Mapped types. The following types have basic equivalents in OPAL. Instead
  * of being redefined as independent types, they will be made synonyms to
  * the most basic type.
