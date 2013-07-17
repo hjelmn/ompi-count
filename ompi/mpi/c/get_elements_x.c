@@ -9,7 +9,6 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
- * Copyright (c) 2007      Cisco Systems, Inc.  All rights reserved.
  * Copyright (c) 2013      Los Alamos National Security, LLC. All rights
  *                         reserved.
  * $COPYRIGHT$
@@ -19,18 +18,17 @@
  * $HEADER$
  */
 
-#include "ompi/mpi/c/status_set_elements.h"
+#include "ompi/mpi/c/get_elements.h"
 
 #if OPAL_HAVE_WEAK_SYMBOLS && OMPI_PROFILING_DEFINES
-#pragma weak MPI_Status_set_elements = PMPI_Status_set_elements
+#pragma weak MPI_Get_elements_x = PMPI_Get_elements_x
 #endif
 
 #if OMPI_PROFILING_DEFINES
 #include "ompi/mpi/c/profile/defines.h"
 #endif
 
-int MPI_Status_set_elements(MPI_Status *status, MPI_Datatype datatype, int count)
+int MPI_Get_elements_x(MPI_Status *status, MPI_Datatype datatype, MPI_Count *count)
 {
-    return _MPI_Status_set_elements ("MPI_Status_set_elements", status, datatype,
-                                     (MPI_Count) count);
+    return _MPI_Get_elements ("MPI_Get_elements_x", status, datatype, count);
 }

@@ -22,15 +22,15 @@
 #include "ompi/mpi/c/status_set_elements.h"
 
 #if OPAL_HAVE_WEAK_SYMBOLS && OMPI_PROFILING_DEFINES
-#pragma weak MPI_Status_set_elements = PMPI_Status_set_elements
+#pragma weak MPI_Status_set_elements_x = PMPI_Status_set_elements_x
 #endif
 
 #if OMPI_PROFILING_DEFINES
 #include "ompi/mpi/c/profile/defines.h"
 #endif
 
-int MPI_Status_set_elements(MPI_Status *status, MPI_Datatype datatype, int count)
+int MPI_Status_set_elements_x(MPI_Status *status, MPI_Datatype datatype, MPI_Count count)
 {
-    return _MPI_Status_set_elements ("MPI_Status_set_elements", status, datatype,
-                                     (MPI_Count) count);
+    return _MPI_Status_set_elements ("MPI_Status_set_elements_x", status, datatype,
+                                     count);
 }
