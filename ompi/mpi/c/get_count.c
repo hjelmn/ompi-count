@@ -69,16 +69,9 @@ int MPI_Get_count(MPI_Status *status, MPI_Datatype datatype, int *count)
             *count = 0;
         } else {
             internal_count = status->_ucount / size; /* count the number of complete datatypes */
-            if( (internal_count * size) != status->_ucount ) {
+            if( (internal_count * size) != status->_ucount ||
+                internal_count > ((size_t) INT_MAX) ) {
                 *count = MPI_UNDEFINED;
-            } else if( internal_count > ((size_t)INT_MAX) ) {
-                /* We have more elements that we can represent with a
-                 * signed int, and therefore we're outside the
-                 * standard here. I don't see what should we report
-                 * back here to make it useful. So, let's return an
-                 * untouched *count and trigger an MPI_ERR_TRUNCATE.
-                 */
-                return OMPI_ERRHANDLER_INVOKE(MPI_COMM_WORLD, MPI_ERR_TRUNCATE, FUNC_NAME);
             } else {
                 *count = (int)internal_count;
             }
