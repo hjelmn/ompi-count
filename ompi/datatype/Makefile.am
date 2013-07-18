@@ -41,7 +41,7 @@ libdatatype_la_SOURCES = \
         ompi_datatype_match_size.c \
         ompi_datatype_module.c \
         ompi_datatype_sndrcv.c \
-	ompi_datatype_get_elements.c
+        ompi_datatype_get_elements.c
 
 libdatatype_la_LIBADD =
 
