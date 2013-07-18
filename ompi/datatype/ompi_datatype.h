@@ -366,6 +366,16 @@ ompi_datatype_create_from_packed_description( void** packed_buffer,
  */
 OMPI_DECLSPEC int32_t ompi_datatype_print_args( const ompi_datatype_t* pData );
 
+
+/**
+ * Get the number of basic elements of the datatype in ucount
+ *
+ * @returns OMPI_SUCCESS if the count is valid
+ * @returns OMPI_ERR_VALUE_OUT_OF_BOUNDS if no
+ */
+OMPI_DECLSPEC int ompi_datatype_get_elements (ompi_datatype_t *datatype, size_t ucount,
+                                              size_t *count);
+
 #if OPAL_ENABLE_DEBUG
 /*
  * Set a breakpoint to this function in your favorite debugger

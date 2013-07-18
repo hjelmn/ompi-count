@@ -47,8 +47,6 @@ endif
 
 headers = bindings.h
 
-noinst_HEADERS = get_elements.h status_set_elements.h
-
 #
 # libmpi_c.la is always build because it contains some non-profilied
 # functions.
